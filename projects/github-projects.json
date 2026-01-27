@@ -1,0 +1,198 @@
+{
+  "$schema": "https://blackroad.io/schemas/github-projects.json",
+  "version": "2.0.0",
+  "metadata": {
+    "organization": "BlackRoad-OS",
+    "projectName": "BlackRoad Empire",
+    "description": "Salesforce-like project management via GitHub Projects V2",
+    "lastUpdated": "2026-01-27"
+  },
+  "projectStructure": {
+    "mainProject": {
+      "name": "BlackRoad Empire",
+      "description": "Central project board for all 27+ empire repos",
+      "visibility": "private",
+      "owner": "BlackRoad-OS"
+    },
+    "views": [
+      {
+        "name": "Kanban Board",
+        "type": "board",
+        "groupBy": "status",
+        "sortBy": "priority"
+      },
+      {
+        "name": "Sprint View",
+        "type": "table",
+        "groupBy": "sprint",
+        "sortBy": "dueDate"
+      },
+      {
+        "name": "Repository Breakdown",
+        "type": "table",
+        "groupBy": "repository",
+        "sortBy": "status"
+      },
+      {
+        "name": "Agent Assignments",
+        "type": "board",
+        "groupBy": "assignee",
+        "filterBy": "type:agent-task"
+      },
+      {
+        "name": "Timeline",
+        "type": "roadmap",
+        "dateField": "targetDate"
+      }
+    ]
+  },
+  "fields": {
+    "builtin": {
+      "title": {"type": "text", "required": true},
+      "assignees": {"type": "assignees"},
+      "labels": {"type": "labels"},
+      "milestone": {"type": "milestone"},
+      "repository": {"type": "repository"}
+    },
+    "custom": {
+      "status": {
+        "type": "single_select",
+        "options": [
+          {"name": "Backlog", "color": "gray", "description": "Not yet started"},
+          {"name": "Todo", "color": "blue", "description": "Ready to be picked up"},
+          {"name": "In Progress", "color": "yellow", "description": "Currently being worked on"},
+          {"name": "In Review", "color": "purple", "description": "PR submitted, awaiting review"},
+          {"name": "Blocked", "color": "red", "description": "Cannot proceed"},
+          {"name": "Done", "color": "green", "description": "Completed and merged"}
+        ]
+      },
+      "priority": {
+        "type": "single_select",
+        "options": [
+          {"name": "Critical", "color": "red", "weight": 4},
+          {"name": "High", "color": "orange", "weight": 3},
+          {"name": "Medium", "color": "yellow", "weight": 2},
+          {"name": "Low", "color": "gray", "weight": 1}
+        ]
+      },
+      "type": {
+        "type": "single_select",
+        "options": [
+          {"name": "Feature", "color": "green"},
+          {"name": "Bug", "color": "red"},
+          {"name": "Enhancement", "color": "blue"},
+          {"name": "Documentation", "color": "purple"},
+          {"name": "Security", "color": "orange"},
+          {"name": "Infrastructure", "color": "gray"},
+          {"name": "Agent Task", "color": "cyan"}
+        ]
+      },
+      "sprint": {
+        "type": "iteration",
+        "duration": 14,
+        "startDay": "monday"
+      },
+      "storyPoints": {
+        "type": "number",
+        "min": 1,
+        "max": 21
+      },
+      "targetDate": {
+        "type": "date"
+      },
+      "linkedSalesforceId": {
+        "type": "text",
+        "description": "Salesforce record ID for CRM sync"
+      },
+      "cloudflareKvKey": {
+        "type": "text",
+        "description": "Cloudflare KV key for state sync"
+      },
+      "deploymentStatus": {
+        "type": "single_select",
+        "options": [
+          {"name": "Not Deployed", "color": "gray"},
+          {"name": "Staging", "color": "yellow"},
+          {"name": "Production", "color": "green"},
+          {"name": "Rolled Back", "color": "red"}
+        ]
+      }
+    }
+  },
+  "automations": {
+    "onIssueOpened": {
+      "addToProject": true,
+      "setStatus": "Backlog",
+      "autoLabel": true
+    },
+    "onPullRequestOpened": {
+      "addToProject": true,
+      "setStatus": "In Review",
+      "linkToIssue": true
+    },
+    "onPullRequestMerged": {
+      "setStatus": "Done",
+      "triggerSalesforceSync": true,
+      "updateCloudflareState": true
+    },
+    "onPullRequestClosed": {
+      "setStatus": "Backlog",
+      "addLabel": "needs-review"
+    },
+    "onLabelAdded": {
+      "priority:critical": {"notify": ["@blackroad-team"], "setStatus": "Todo"},
+      "bug": {"setType": "Bug"},
+      "security": {"setType": "Security", "setPriority": "Critical"}
+    }
+  },
+  "repositories": {
+    "core": [
+      "blackroad-io",
+      "blackroad-api",
+      "blackroad-core",
+      "blackroad-cli"
+    ],
+    "apps": [
+      "remix-studio",
+      "mindforge",
+      "quantum-garden",
+      "neural-canvas"
+    ],
+    "infrastructure": [
+      "cloudflare-workers",
+      "pi-cluster",
+      "k8s-manifests",
+      "terraform-configs"
+    ],
+    "agents": [
+      "claude-agents",
+      "ai-workers",
+      "automation-scripts"
+    ]
+  },
+  "graphqlQueries": {
+    "createProject": "mutation CreateProject($ownerId: ID!, $title: String!) { createProjectV2(input: {ownerId: $ownerId, title: $title}) { projectV2 { id number url } } }",
+    "addItem": "mutation AddItem($projectId: ID!, $contentId: ID!) { addProjectV2ItemById(input: {projectId: $projectId, contentId: $contentId}) { item { id } } }",
+    "updateField": "mutation UpdateField($projectId: ID!, $itemId: ID!, $fieldId: ID!, $value: ProjectV2FieldValue!) { updateProjectV2ItemFieldValue(input: {projectId: $projectId, itemId: $itemId, fieldId: $fieldId, value: $value}) { projectV2Item { id } } }",
+    "getProject": "query GetProject($org: String!, $number: Int!) { organization(login: $org) { projectV2(number: $number) { id title items(first: 100) { nodes { id content { ... on Issue { title number } ... on PullRequest { title number } } } } } } }"
+  },
+  "syncConfiguration": {
+    "salesforce": {
+      "enabled": true,
+      "syncFields": {
+        "title": "Name",
+        "status": "Status__c",
+        "priority": "Priority__c",
+        "storyPoints": "Story_Points__c",
+        "repository": "Repository__c"
+      },
+      "triggerOn": ["statusChange", "prMerged", "issueClosed"]
+    },
+    "cloudflare": {
+      "enabled": true,
+      "kvNamespace": "BLACKROAD_PROJECTS_KV",
+      "cachePrefix": "project:",
+      "ttl": 3600
+    }
+  }
+}

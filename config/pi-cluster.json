@@ -1,0 +1,249 @@
+{
+  "$schema": "https://blackroad.io/schemas/pi-cluster.json",
+  "version": "2.0.0",
+  "metadata": {
+    "description": "Raspberry Pi cluster configuration for edge computing",
+    "lastUpdated": "2026-01-27"
+  },
+  "cluster": {
+    "name": "blackroad-pi-cluster",
+    "nodes": 5,
+    "architecture": "arm64",
+    "network": {
+      "subnet": "10.0.1.0/24",
+      "gateway": "10.0.1.1",
+      "dns": ["10.0.1.1", "1.1.1.1"]
+    }
+  },
+  "nodes": {
+    "gateway": {
+      "hostname": "pi-gateway",
+      "ip": "10.0.1.1",
+      "localDns": "pi-gateway.local",
+      "model": "Raspberry Pi 5",
+      "memory": "8GB",
+      "storage": "256GB NVMe",
+      "role": ["gateway", "load-balancer", "dns", "orchestrator"],
+      "services": {
+        "nginx": {"port": 80, "purpose": "reverse-proxy"},
+        "dnsmasq": {"port": 53, "purpose": "local-dns"},
+        "k3s-server": {"port": 6443, "purpose": "kubernetes-control"},
+        "prometheus": {"port": 9090, "purpose": "metrics"},
+        "grafana": {"port": 3000, "purpose": "dashboards"}
+      }
+    },
+    "node1": {
+      "hostname": "pi-node-1",
+      "ip": "10.0.1.11",
+      "localDns": "pi-node-1.local",
+      "model": "Raspberry Pi 5",
+      "memory": "8GB",
+      "storage": "128GB NVMe",
+      "role": ["worker", "compute"],
+      "services": {
+        "k3s-agent": {"purpose": "kubernetes-worker"},
+        "docker": {"purpose": "container-runtime"}
+      },
+      "labels": {"workload": "general"}
+    },
+    "node2": {
+      "hostname": "pi-node-2",
+      "ip": "10.0.1.12",
+      "localDns": "pi-node-2.local",
+      "model": "Raspberry Pi 5",
+      "memory": "8GB",
+      "storage": "128GB NVMe",
+      "role": ["worker", "compute"],
+      "services": {
+        "k3s-agent": {"purpose": "kubernetes-worker"},
+        "docker": {"purpose": "container-runtime"}
+      },
+      "labels": {"workload": "general"}
+    },
+    "node3": {
+      "hostname": "pi-node-3",
+      "ip": "10.0.1.13",
+      "localDns": "pi-node-3.local",
+      "model": "Raspberry Pi 4",
+      "memory": "4GB",
+      "storage": "64GB SD",
+      "role": ["worker", "storage"],
+      "services": {
+        "k3s-agent": {"purpose": "kubernetes-worker"},
+        "minio": {"port": 9000, "purpose": "object-storage"},
+        "nfs-server": {"purpose": "shared-storage"}
+      },
+      "labels": {"workload": "storage"}
+    },
+    "node4": {
+      "hostname": "pi-node-4",
+      "ip": "10.0.1.14",
+      "localDns": "pi-node-4.local",
+      "model": "Raspberry Pi 4",
+      "memory": "4GB",
+      "storage": "64GB SD",
+      "role": ["worker", "iot"],
+      "services": {
+        "k3s-agent": {"purpose": "kubernetes-worker"},
+        "mqtt-broker": {"port": 1883, "purpose": "iot-messaging"},
+        "node-red": {"port": 1880, "purpose": "iot-automation"}
+      },
+      "labels": {"workload": "iot"}
+    }
+  },
+  "kubernetes": {
+    "distribution": "k3s",
+    "version": "v1.29.0+k3s1",
+    "config": {
+      "clusterCidr": "10.42.0.0/16",
+      "serviceCidr": "10.43.0.0/16",
+      "clusterDns": "10.43.0.10"
+    },
+    "namespaces": [
+      "blackroad",
+      "monitoring",
+      "storage",
+      "iot"
+    ],
+    "deployments": {
+      "blackroad-agent": {
+        "namespace": "blackroad",
+        "replicas": 2,
+        "image": "blackroad/agent:latest",
+        "resources": {
+          "requests": {"cpu": "100m", "memory": "256Mi"},
+          "limits": {"cpu": "500m", "memory": "512Mi"}
+        }
+      },
+      "blackroad-sync": {
+        "namespace": "blackroad",
+        "replicas": 1,
+        "image": "blackroad/sync:latest",
+        "schedule": "*/5 * * * *"
+      }
+    }
+  },
+  "monitoring": {
+    "prometheus": {
+      "enabled": true,
+      "retention": "15d",
+      "scrapeInterval": "15s",
+      "targets": [
+        {"job": "kubernetes", "targets": ["localhost:6443"]},
+        {"job": "node", "targets": ["pi-node-1:9100", "pi-node-2:9100", "pi-node-3:9100", "pi-node-4:9100"]},
+        {"job": "blackroad", "targets": ["blackroad-agent:8080"]}
+      ]
+    },
+    "grafana": {
+      "enabled": true,
+      "dashboards": [
+        "kubernetes-cluster",
+        "node-exporter",
+        "blackroad-metrics"
+      ],
+      "alerting": {
+        "enabled": true,
+        "notificationChannels": ["slack", "email"]
+      }
+    },
+    "alerts": [
+      {
+        "name": "NodeDown",
+        "expr": "up{job='node'} == 0",
+        "for": "1m",
+        "severity": "critical"
+      },
+      {
+        "name": "HighMemoryUsage",
+        "expr": "node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes < 0.1",
+        "for": "5m",
+        "severity": "warning"
+      },
+      {
+        "name": "HighCpuUsage",
+        "expr": "100 - (avg by(instance) (irate(node_cpu_seconds_total{mode='idle'}[5m])) * 100) > 80",
+        "for": "5m",
+        "severity": "warning"
+      },
+      {
+        "name": "DiskSpaceLow",
+        "expr": "node_filesystem_avail_bytes{mountpoint='/'} / node_filesystem_size_bytes{mountpoint='/'} < 0.1",
+        "for": "5m",
+        "severity": "warning"
+      }
+    ]
+  },
+  "networking": {
+    "dns": {
+      "provider": "dnsmasq",
+      "localDomain": ".local",
+      "upstream": ["1.1.1.1", "8.8.8.8"]
+    },
+    "loadBalancer": {
+      "provider": "nginx",
+      "upstreams": {
+        "blackroad-api": {
+          "servers": ["pi-node-1:8080", "pi-node-2:8080"],
+          "healthCheck": "/health"
+        }
+      }
+    },
+    "vpn": {
+      "enabled": true,
+      "provider": "tailscale",
+      "exitNode": "pi-gateway"
+    }
+  },
+  "storage": {
+    "nfs": {
+      "enabled": true,
+      "server": "pi-node-3",
+      "exports": [
+        {"path": "/data/shared", "options": "rw,sync,no_subtree_check"},
+        {"path": "/data/backups", "options": "rw,sync,no_subtree_check"}
+      ]
+    },
+    "minio": {
+      "enabled": true,
+      "server": "pi-node-3",
+      "buckets": ["blackroad-data", "blackroad-backups"],
+      "accessKeyEnvVar": "MINIO_ACCESS_KEY",
+      "secretKeyEnvVar": "MINIO_SECRET_KEY"
+    }
+  },
+  "api": {
+    "gateway": {
+      "endpoint": "http://pi-gateway.local:8080",
+      "healthCheck": "/health"
+    },
+    "endpoints": {
+      "health": "/health",
+      "metrics": "/metrics",
+      "nodes": "/api/nodes",
+      "deployments": "/api/deployments",
+      "logs": "/api/logs"
+    },
+    "auth": {
+      "type": "api-key",
+      "envVar": "PI_CLUSTER_API_KEY"
+    }
+  },
+  "automation": {
+    "autoUpdate": {
+      "enabled": true,
+      "schedule": "0 3 * * 0",
+      "rebootIfRequired": true
+    },
+    "backup": {
+      "enabled": true,
+      "schedule": "0 2 * * *",
+      "destination": "minio:blackroad-backups",
+      "retention": "30d"
+    },
+    "healthCheck": {
+      "enabled": true,
+      "interval": "1m",
+      "notifyOnFailure": true
+    }
+  }
+}

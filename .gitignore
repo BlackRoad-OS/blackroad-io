@@ -1,0 +1,94 @@
+# BlackRoad OS .gitignore
+
+# Environment files (NEVER commit real secrets!)
+.env
+.env.local
+.env.*.local
+.env.production
+.env.staging
+.env.development
+
+# Keep template
+!.env.template
+!.env.example
+
+# Dependencies
+node_modules/
+vendor/
+__pycache__/
+*.pyc
+.venv/
+venv/
+.virtualenv/
+
+# Build outputs
+dist/
+build/
+.next/
+.nuxt/
+.output/
+*.egg-info/
+
+# IDE and editors
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Testing
+coverage/
+.coverage
+.nyc_output/
+*.lcov
+
+# Temporary files
+tmp/
+temp/
+.tmp/
+.cache/
+*.tmp
+*.temp
+
+# OS files
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Secrets and credentials
+*.pem
+*.key
+*.p12
+*.pfx
+credentials.json
+service-account.json
+secrets/
+
+# Content hashes (regenerate as needed)
+.content-hashes.json
+
+# Local development
+.local/
+.localstack/
+
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+*.tfvars
+
+# Kubernetes
+kubeconfig
+*.kubeconfig

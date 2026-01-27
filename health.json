@@ -1,6 +1,29 @@
 {
   "status": "healthy",
   "service": "blackroad-io",
-  "version": "1.0.0",
-  "timestamp": "{{TIMESTAMP}}"
+  "version": "2.0.0",
+  "timestamp": "{{TIMESTAMP}}",
+  "components": {
+    "config": "operational",
+    "projects": "operational",
+    "utils": "operational",
+    "workflows": "operational"
+  },
+  "integrations": {
+    "github": "configured",
+    "cloudflare": "configured",
+    "salesforce": "configured",
+    "vercel": "configured",
+    "digitalocean": "configured",
+    "claude": "configured",
+    "pi-cluster": "configured",
+    "mobile-tools": "configured"
+  },
+  "features": {
+    "sha256-hashing": true,
+    "sha-infinity-hashing": true,
+    "pr-validation": true,
+    "state-sync": true,
+    "agent-automation": true
+  }
 }

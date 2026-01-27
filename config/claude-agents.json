@@ -1,0 +1,160 @@
+{
+  "$schema": "https://blackroad.io/schemas/claude-agents.json",
+  "version": "2.0.0",
+  "metadata": {
+    "description": "Claude AI agent configuration for BlackRoad OS automation",
+    "lastUpdated": "2026-01-27"
+  },
+  "connection": {
+    "apiEndpoint": "https://api.anthropic.com/v1",
+    "authEnvVar": "ANTHROPIC_API_KEY",
+    "apiVersion": "2023-06-01"
+  },
+  "models": {
+    "opus": {
+      "id": "claude-opus-4-5-20251101",
+      "displayName": "Claude Opus 4.5",
+      "maxTokens": 8192,
+      "useCase": "Complex reasoning, architecture decisions, multi-file refactoring",
+      "costTier": "high"
+    },
+    "sonnet": {
+      "id": "claude-sonnet-4-20250514",
+      "displayName": "Claude Sonnet 4",
+      "maxTokens": 8192,
+      "useCase": "General development, code review, feature implementation",
+      "costTier": "medium"
+    },
+    "haiku": {
+      "id": "claude-haiku-3-5-20241022",
+      "displayName": "Claude Haiku 3.5",
+      "maxTokens": 4096,
+      "useCase": "Quick tasks, simple fixes, code formatting, health checks",
+      "costTier": "low"
+    }
+  },
+  "agents": {
+    "codeReviewer": {
+      "name": "Code Reviewer Agent",
+      "model": "sonnet",
+      "description": "Reviews pull requests and provides feedback",
+      "systemPrompt": "You are a senior code reviewer for BlackRoad OS. Review code for:\n1. Security vulnerabilities (OWASP Top 10)\n2. Performance issues\n3. Code style consistency\n4. Best practices\n5. Test coverage\n\nProvide actionable feedback with specific line references.",
+      "triggers": ["pull_request.opened", "pull_request.synchronize"],
+      "maxTokens": 4096,
+      "temperature": 0.3
+    },
+    "bugFixer": {
+      "name": "Bug Fixer Agent",
+      "model": "sonnet",
+      "description": "Analyzes and fixes reported bugs",
+      "systemPrompt": "You are a bug fixing specialist for BlackRoad OS. When given a bug report:\n1. Analyze the error and stack trace\n2. Identify root cause\n3. Propose and implement a fix\n4. Add regression tests\n5. Document the fix\n\nAlways create a new branch with prefix 'claude/fix-'",
+      "triggers": ["issues.labeled.bug"],
+      "maxTokens": 8192,
+      "temperature": 0.2
+    },
+    "featureBuilder": {
+      "name": "Feature Builder Agent",
+      "model": "opus",
+      "description": "Implements new features from specifications",
+      "systemPrompt": "You are a feature implementation specialist for BlackRoad OS. When given a feature request:\n1. Break down the feature into tasks\n2. Identify affected files and modules\n3. Implement incrementally with tests\n4. Update documentation\n5. Create comprehensive PR\n\nFollow existing code patterns and conventions.",
+      "triggers": ["issues.labeled.feature", "project_card.moved.todo"],
+      "maxTokens": 8192,
+      "temperature": 0.5
+    },
+    "documentationWriter": {
+      "name": "Documentation Writer Agent",
+      "model": "haiku",
+      "description": "Generates and updates documentation",
+      "systemPrompt": "You are a documentation specialist for BlackRoad OS. Generate clear, concise documentation:\n1. API documentation with examples\n2. README updates\n3. Code comments for complex logic\n4. Architecture decision records\n\nUse proper markdown formatting.",
+      "triggers": ["issues.labeled.documentation"],
+      "maxTokens": 4096,
+      "temperature": 0.4
+    },
+    "securityAuditor": {
+      "name": "Security Auditor Agent",
+      "model": "opus",
+      "description": "Performs security audits and fixes vulnerabilities",
+      "systemPrompt": "You are a security specialist for BlackRoad OS. Conduct security audits:\n1. Scan for OWASP Top 10 vulnerabilities\n2. Check dependency vulnerabilities\n3. Review authentication/authorization\n4. Identify data exposure risks\n5. Propose and implement fixes\n\nPrioritize by severity: Critical > High > Medium > Low",
+      "triggers": ["schedule.weekly", "issues.labeled.security"],
+      "maxTokens": 8192,
+      "temperature": 0.1
+    },
+    "prValidator": {
+      "name": "PR Validator Agent",
+      "model": "haiku",
+      "description": "Validates PRs before merge to prevent failures",
+      "systemPrompt": "You are a PR validation specialist for BlackRoad OS. Validate PRs:\n1. Check branch naming conventions (claude/* for agent PRs)\n2. Verify commit message format\n3. Ensure tests pass\n4. Check for merge conflicts\n5. Validate file changes are appropriate\n6. Verify hash integrity if applicable\n\nReject PRs that don't meet standards with clear feedback.",
+      "triggers": ["pull_request.opened", "pull_request.synchronize", "pull_request.ready_for_review"],
+      "maxTokens": 2048,
+      "temperature": 0.1
+    },
+    "syncAgent": {
+      "name": "State Sync Agent",
+      "model": "haiku",
+      "description": "Syncs state between GitHub, Cloudflare, and Salesforce",
+      "systemPrompt": "You are a state synchronization agent for BlackRoad OS. Maintain consistency:\n1. Sync GitHub Projects to Salesforce CRM\n2. Update Cloudflare KV with current state\n3. Resolve sync conflicts (newest wins)\n4. Log all sync operations\n5. Alert on sync failures",
+      "triggers": ["schedule.every5min", "webhook.stateChange"],
+      "maxTokens": 2048,
+      "temperature": 0
+    }
+  },
+  "workflows": {
+    "prLifecycle": {
+      "name": "PR Lifecycle Workflow",
+      "description": "Full PR lifecycle from creation to merge",
+      "steps": [
+        {"agent": "prValidator", "action": "validate", "required": true},
+        {"agent": "codeReviewer", "action": "review", "required": true},
+        {"agent": "securityAuditor", "action": "scan", "required": false},
+        {"condition": "approved", "action": "merge"}
+      ]
+    },
+    "bugFixWorkflow": {
+      "name": "Bug Fix Workflow",
+      "description": "Automated bug fixing from issue to PR",
+      "steps": [
+        {"agent": "bugFixer", "action": "analyze", "required": true},
+        {"agent": "bugFixer", "action": "implement", "required": true},
+        {"agent": "prValidator", "action": "validate", "required": true},
+        {"agent": "codeReviewer", "action": "review", "required": true}
+      ]
+    },
+    "featureWorkflow": {
+      "name": "Feature Implementation Workflow",
+      "description": "Full feature from spec to deployment",
+      "steps": [
+        {"agent": "featureBuilder", "action": "plan", "required": true},
+        {"agent": "featureBuilder", "action": "implement", "required": true},
+        {"agent": "documentationWriter", "action": "document", "required": true},
+        {"agent": "prValidator", "action": "validate", "required": true},
+        {"agent": "codeReviewer", "action": "review", "required": true},
+        {"agent": "syncAgent", "action": "updateState", "required": true}
+      ]
+    }
+  },
+  "rateLimits": {
+    "maxConcurrentAgents": 5,
+    "maxTokensPerMinute": 100000,
+    "maxRequestsPerMinute": 60,
+    "cooldownOnRateLimit": "60s"
+  },
+  "errorHandling": {
+    "retryAttempts": 3,
+    "retryDelay": "exponential",
+    "fallbackModel": "haiku",
+    "notifyOnFailure": ["slack:agent-alerts", "email:ops@blackroad.io"]
+  },
+  "logging": {
+    "level": "info",
+    "destination": ["cloudflare-kv", "console"],
+    "includePrompts": false,
+    "includeResponses": true,
+    "retentionDays": 30
+  },
+  "costs": {
+    "tracking": true,
+    "budgetPerDay": 100,
+    "alertThreshold": 0.8,
+    "currency": "USD"
+  }
+}

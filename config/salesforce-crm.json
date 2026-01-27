@@ -1,0 +1,213 @@
+{
+  "$schema": "https://blackroad.io/schemas/salesforce-crm.json",
+  "version": "2.0.0",
+  "metadata": {
+    "description": "Salesforce CRM configuration - Detailed records and customer data",
+    "lastUpdated": "2026-01-27"
+  },
+  "connection": {
+    "authEndpoint": "https://login.salesforce.com/services/oauth2/token",
+    "apiVersion": "v59.0",
+    "envVars": {
+      "clientId": "SALESFORCE_CLIENT_ID",
+      "clientSecret": "SALESFORCE_CLIENT_SECRET",
+      "username": "SALESFORCE_USERNAME",
+      "password": "SALESFORCE_PASSWORD",
+      "securityToken": "SALESFORCE_SECURITY_TOKEN",
+      "instanceUrl": "SALESFORCE_INSTANCE_URL"
+    }
+  },
+  "customObjects": {
+    "BlackRoad_Project__c": {
+      "label": "BlackRoad Project",
+      "pluralLabel": "BlackRoad Projects",
+      "description": "Mirrors GitHub Projects with extended CRM data",
+      "fields": {
+        "Name": {"type": "Text", "length": 255, "required": true},
+        "GitHub_Project_ID__c": {"type": "Text", "length": 50, "unique": true, "externalId": true},
+        "GitHub_Project_Number__c": {"type": "Number"},
+        "Cloudflare_KV_Key__c": {"type": "Text", "length": 255},
+        "Status__c": {
+          "type": "Picklist",
+          "values": ["Backlog", "Todo", "In Progress", "In Review", "Blocked", "Done"]
+        },
+        "Priority__c": {
+          "type": "Picklist",
+          "values": ["Critical", "High", "Medium", "Low"]
+        },
+        "Type__c": {
+          "type": "Picklist",
+          "values": ["Feature", "Bug", "Enhancement", "Documentation", "Security", "Infrastructure"]
+        },
+        "Story_Points__c": {"type": "Number", "precision": 3, "scale": 0},
+        "Target_Date__c": {"type": "Date"},
+        "Repository__c": {"type": "Lookup", "referenceTo": "BlackRoad_Repository__c"},
+        "Assigned_Agent__c": {"type": "Lookup", "referenceTo": "BlackRoad_Agent__c"},
+        "Hash_SHA256__c": {"type": "Text", "length": 64},
+        "Hash_SHA_Infinity__c": {"type": "LongTextArea", "length": 500},
+        "Last_Sync__c": {"type": "DateTime"}
+      }
+    },
+    "BlackRoad_Repository__c": {
+      "label": "BlackRoad Repository",
+      "pluralLabel": "BlackRoad Repositories",
+      "description": "GitHub repository records",
+      "fields": {
+        "Name": {"type": "Text", "length": 255, "required": true},
+        "GitHub_Repo_ID__c": {"type": "Text", "length": 50, "unique": true, "externalId": true},
+        "Owner__c": {"type": "Text", "length": 100},
+        "Default_Branch__c": {"type": "Text", "length": 100},
+        "Last_Commit_SHA__c": {"type": "Text", "length": 40},
+        "Last_Commit_Date__c": {"type": "DateTime"},
+        "Deploy_Status__c": {
+          "type": "Picklist",
+          "values": ["Not Deployed", "Deploying", "Deployed", "Failed", "Rolled Back"]
+        },
+        "Cloudflare_Project__c": {"type": "Text", "length": 100},
+        "Vercel_Project__c": {"type": "Text", "length": 100},
+        "Total_PRs__c": {"type": "Number"},
+        "Open_PRs__c": {"type": "Number"},
+        "Failed_PRs__c": {"type": "Number"}
+      }
+    },
+    "BlackRoad_PullRequest__c": {
+      "label": "BlackRoad Pull Request",
+      "pluralLabel": "BlackRoad Pull Requests",
+      "description": "Pull request tracking with validation history",
+      "fields": {
+        "Name": {"type": "Text", "length": 255, "required": true},
+        "GitHub_PR_ID__c": {"type": "Text", "length": 50, "unique": true, "externalId": true},
+        "PR_Number__c": {"type": "Number"},
+        "Repository__c": {"type": "Lookup", "referenceTo": "BlackRoad_Repository__c"},
+        "Project__c": {"type": "Lookup", "referenceTo": "BlackRoad_Project__c"},
+        "Status__c": {
+          "type": "Picklist",
+          "values": ["Open", "Merged", "Closed", "Failed"]
+        },
+        "Validation_Status__c": {
+          "type": "Picklist",
+          "values": ["Pending", "Passed", "Failed", "Skipped"]
+        },
+        "Validation_Errors__c": {"type": "LongTextArea", "length": 32000},
+        "Head_SHA__c": {"type": "Text", "length": 40},
+        "Base_Branch__c": {"type": "Text", "length": 100},
+        "Head_Branch__c": {"type": "Text", "length": 100},
+        "Author__c": {"type": "Text", "length": 100},
+        "Created_At__c": {"type": "DateTime"},
+        "Merged_At__c": {"type": "DateTime"},
+        "Content_Hash__c": {"type": "Text", "length": 64},
+        "Verification_String__c": {"type": "LongTextArea", "length": 500}
+      }
+    },
+    "BlackRoad_Agent__c": {
+      "label": "BlackRoad Agent",
+      "pluralLabel": "BlackRoad Agents",
+      "description": "AI agent records and performance tracking",
+      "fields": {
+        "Name": {"type": "Text", "length": 255, "required": true},
+        "Agent_ID__c": {"type": "Text", "length": 100, "unique": true, "externalId": true},
+        "Type__c": {
+          "type": "Picklist",
+          "values": ["Claude Opus", "Claude Sonnet", "Claude Haiku", "Automation", "Worker"]
+        },
+        "Status__c": {
+          "type": "Picklist",
+          "values": ["Active", "Idle", "Error", "Offline"]
+        },
+        "Current_Session__c": {"type": "Text", "length": 100},
+        "Total_Sessions__c": {"type": "Number"},
+        "Total_Tokens_Used__c": {"type": "Number"},
+        "Tasks_Completed__c": {"type": "Number"},
+        "Tasks_Failed__c": {"type": "Number"},
+        "Success_Rate__c": {"type": "Percent", "precision": 5, "scale": 2},
+        "Last_Active__c": {"type": "DateTime"},
+        "Assigned_Repositories__c": {"type": "LongTextArea", "length": 5000}
+      }
+    },
+    "BlackRoad_Deployment__c": {
+      "label": "BlackRoad Deployment",
+      "pluralLabel": "BlackRoad Deployments",
+      "description": "Deployment history across all providers",
+      "fields": {
+        "Name": {"type": "Text", "length": 255, "required": true},
+        "Deployment_ID__c": {"type": "Text", "length": 100, "unique": true, "externalId": true},
+        "Repository__c": {"type": "Lookup", "referenceTo": "BlackRoad_Repository__c"},
+        "Pull_Request__c": {"type": "Lookup", "referenceTo": "BlackRoad_PullRequest__c"},
+        "Provider__c": {
+          "type": "Picklist",
+          "values": ["Cloudflare Pages", "Cloudflare Workers", "Vercel", "Digital Ocean", "GitHub Pages"]
+        },
+        "Environment__c": {
+          "type": "Picklist",
+          "values": ["Production", "Staging", "Preview", "Development"]
+        },
+        "Status__c": {
+          "type": "Picklist",
+          "values": ["Queued", "Building", "Deploying", "Success", "Failed", "Cancelled"]
+        },
+        "URL__c": {"type": "URL"},
+        "Commit_SHA__c": {"type": "Text", "length": 40},
+        "Build_Time__c": {"type": "Number"},
+        "Deployed_At__c": {"type": "DateTime"},
+        "Error_Message__c": {"type": "LongTextArea", "length": 10000}
+      }
+    }
+  },
+  "flows": {
+    "Project_Status_Sync": {
+      "description": "Sync project status changes to GitHub and Cloudflare",
+      "trigger": "Record Update on BlackRoad_Project__c.Status__c",
+      "actions": [
+        "Call GitHub API to update project item",
+        "Update Cloudflare KV state",
+        "Create Activity record"
+      ]
+    },
+    "PR_Merge_Handler": {
+      "description": "Handle PR merge events",
+      "trigger": "Record Update on BlackRoad_PullRequest__c.Status__c = Merged",
+      "actions": [
+        "Update related Project status to Done",
+        "Update Repository stats",
+        "Create Deployment record if auto-deploy enabled"
+      ]
+    },
+    "Agent_Performance_Calculator": {
+      "description": "Calculate agent success rates",
+      "trigger": "Scheduled - Daily",
+      "actions": [
+        "Query all agent task completions",
+        "Calculate success rates",
+        "Update Agent records"
+      ]
+    }
+  },
+  "reports": {
+    "Project_Status_Dashboard": {
+      "type": "Dashboard",
+      "components": [
+        "Projects by Status (Donut)",
+        "Open PRs by Repository (Bar)",
+        "Deployment Success Rate (Gauge)",
+        "Agent Performance (Table)"
+      ]
+    },
+    "PR_Health_Report": {
+      "type": "Report",
+      "object": "BlackRoad_PullRequest__c",
+      "filters": ["Status__c = Open OR Status__c = Failed"],
+      "groupBy": "Repository__c",
+      "columns": ["Name", "PR_Number__c", "Validation_Status__c", "Author__c", "Created_At__c"]
+    }
+  },
+  "integrationSettings": {
+    "webhookEndpoint": "https://webhooks.blackroad.io/salesforce",
+    "outboundMessages": {
+      "onProjectChange": true,
+      "onPRMerge": true,
+      "onDeploymentComplete": true
+    },
+    "syncFrequency": "realtime",
+    "fallbackPolling": "5m"
+  }
+}
