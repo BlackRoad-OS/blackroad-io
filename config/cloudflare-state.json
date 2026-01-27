@@ -1,0 +1,188 @@
+{
+  "$schema": "https://blackroad.io/schemas/cloudflare-state.json",
+  "version": "2.0.0",
+  "metadata": {
+    "description": "Cloudflare state management configuration - Primary state holder for BlackRoad OS",
+    "lastUpdated": "2026-01-27"
+  },
+  "account": {
+    "idEnvVar": "CLOUDFLARE_ACCOUNT_ID",
+    "tokenEnvVar": "CLOUDFLARE_API_TOKEN"
+  },
+  "kvNamespaces": {
+    "projects": {
+      "id": "BLACKROAD_PROJECTS_KV",
+      "description": "GitHub Projects state mirror",
+      "keyPattern": "project:{projectId}:{itemId}",
+      "ttl": null,
+      "syncSource": "github-projects"
+    },
+    "sessions": {
+      "id": "BLACKROAD_SESSIONS_KV",
+      "description": "Agent and user session state",
+      "keyPattern": "session:{type}:{id}",
+      "ttl": 86400,
+      "syncSource": "internal"
+    },
+    "cache": {
+      "id": "BLACKROAD_CACHE_KV",
+      "description": "General purpose cache",
+      "keyPattern": "cache:{namespace}:{key}",
+      "ttl": 3600,
+      "syncSource": "computed"
+    },
+    "agents": {
+      "id": "BLACKROAD_AGENTS_KV",
+      "description": "AI agent state and context",
+      "keyPattern": "agent:{agentId}:{dataType}",
+      "ttl": null,
+      "syncSource": "claude-api"
+    },
+    "deployments": {
+      "id": "BLACKROAD_DEPLOYMENTS_KV",
+      "description": "Deployment state and history",
+      "keyPattern": "deploy:{provider}:{projectId}:{deployId}",
+      "ttl": null,
+      "syncSource": "webhooks"
+    },
+    "pullRequests": {
+      "id": "BLACKROAD_PRS_KV",
+      "description": "Pull request state tracking",
+      "keyPattern": "pr:{repo}:{number}",
+      "ttl": 604800,
+      "syncSource": "github-webhooks"
+    }
+  },
+  "d1Databases": {
+    "main": {
+      "name": "blackroad-main-db",
+      "description": "Primary relational database",
+      "tables": {
+        "projects": {
+          "columns": ["id", "github_id", "salesforce_id", "name", "status", "priority", "created_at", "updated_at"]
+        },
+        "repositories": {
+          "columns": ["id", "name", "owner", "project_id", "last_commit", "deploy_status"]
+        },
+        "agents": {
+          "columns": ["id", "type", "session_id", "context_hash", "last_active", "total_tokens"]
+        },
+        "pull_requests": {
+          "columns": ["id", "repo_id", "number", "title", "status", "hash_sha256", "hash_sha_infinity", "created_at", "merged_at"]
+        },
+        "deployments": {
+          "columns": ["id", "project_id", "provider", "status", "url", "commit_sha", "deployed_at"]
+        }
+      }
+    },
+    "analytics": {
+      "name": "blackroad-analytics-db",
+      "description": "Analytics and metrics database",
+      "tables": {
+        "events": {
+          "columns": ["id", "type", "source", "payload", "timestamp"]
+        },
+        "metrics": {
+          "columns": ["id", "name", "value", "labels", "timestamp"]
+        }
+      }
+    }
+  },
+  "r2Buckets": {
+    "assets": {
+      "name": "blackroad-assets",
+      "description": "Static assets and media",
+      "publicAccess": true,
+      "corsEnabled": true
+    },
+    "backups": {
+      "name": "blackroad-backups",
+      "description": "Database and state backups",
+      "publicAccess": false,
+      "lifecycle": {
+        "deleteAfterDays": 90
+      }
+    },
+    "artifacts": {
+      "name": "blackroad-artifacts",
+      "description": "Build artifacts and releases",
+      "publicAccess": false
+    }
+  },
+  "workers": {
+    "api-gateway": {
+      "name": "blackroad-api-gateway",
+      "routes": ["api.blackroad.io/*"],
+      "description": "Main API gateway worker"
+    },
+    "webhook-handler": {
+      "name": "blackroad-webhook-handler",
+      "routes": ["webhooks.blackroad.io/*"],
+      "description": "Handles GitHub, Salesforce, Vercel webhooks"
+    },
+    "state-sync": {
+      "name": "blackroad-state-sync",
+      "cron": "*/5 * * * *",
+      "description": "Periodic state synchronization between services"
+    },
+    "pr-validator": {
+      "name": "blackroad-pr-validator",
+      "routes": ["validate.blackroad.io/*"],
+      "description": "Pre-validates PRs before GitHub Actions"
+    }
+  },
+  "stateSchema": {
+    "project": {
+      "id": "string",
+      "githubId": "string",
+      "salesforceId": "string",
+      "name": "string",
+      "status": "enum:backlog,todo,in_progress,review,done",
+      "priority": "enum:critical,high,medium,low",
+      "repository": "string",
+      "hashSha256": "string",
+      "hashShaInfinity": "string",
+      "lastSync": "timestamp",
+      "metadata": "object"
+    },
+    "pullRequest": {
+      "id": "string",
+      "repository": "string",
+      "number": "integer",
+      "title": "string",
+      "status": "enum:open,merged,closed,failed",
+      "validationStatus": "enum:pending,passed,failed",
+      "validationErrors": "array",
+      "contentHash": "string",
+      "verificationString": "string",
+      "createdAt": "timestamp",
+      "updatedAt": "timestamp"
+    },
+    "agent": {
+      "id": "string",
+      "type": "enum:claude,automation,worker",
+      "sessionId": "string",
+      "contextHash": "string",
+      "tokensUsed": "integer",
+      "lastActive": "timestamp",
+      "assignedTasks": "array"
+    }
+  },
+  "syncRules": {
+    "githubToCloudflare": {
+      "trigger": "webhook",
+      "events": ["push", "pull_request", "issues", "project_card"],
+      "actions": ["updateKv", "updateD1", "notifyAgents"]
+    },
+    "salesforceToCloudflare": {
+      "trigger": "webhook",
+      "events": ["record.created", "record.updated"],
+      "actions": ["updateKv", "syncToGithub"]
+    },
+    "cloudflareToSalesforce": {
+      "trigger": "stateChange",
+      "events": ["project.statusChange", "pr.merged"],
+      "actions": ["createRecord", "updateRecord"]
+    }
+  }
+}

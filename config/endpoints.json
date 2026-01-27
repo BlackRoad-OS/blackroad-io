@@ -1,0 +1,180 @@
+{
+  "$schema": "https://blackroad.io/schemas/endpoints.json",
+  "version": "2.0.0",
+  "metadata": {
+    "project": "blackroad-io",
+    "totalEndpoints": 150,
+    "lastValidated": "2026-01-27"
+  },
+  "categories": {
+    "cloud": {
+      "cloudflare": {
+        "pages": "https://api.cloudflare.com/client/v4/accounts/{account_id}/pages/projects",
+        "workers": "https://api.cloudflare.com/client/v4/accounts/{account_id}/workers/scripts",
+        "kv": "https://api.cloudflare.com/client/v4/accounts/{account_id}/storage/kv/namespaces",
+        "r2": "https://api.cloudflare.com/client/v4/accounts/{account_id}/r2/buckets",
+        "d1": "https://api.cloudflare.com/client/v4/accounts/{account_id}/d1/database",
+        "stream": "https://api.cloudflare.com/client/v4/accounts/{account_id}/stream",
+        "images": "https://api.cloudflare.com/client/v4/accounts/{account_id}/images/v1",
+        "dns": "https://api.cloudflare.com/client/v4/zones/{zone_id}/dns_records",
+        "firewall": "https://api.cloudflare.com/client/v4/zones/{zone_id}/firewall/rules",
+        "analytics": "https://api.cloudflare.com/client/v4/graphql"
+      },
+      "vercel": {
+        "deployments": "https://api.vercel.com/v13/deployments",
+        "projects": "https://api.vercel.com/v9/projects",
+        "domains": "https://api.vercel.com/v5/domains",
+        "env": "https://api.vercel.com/v10/projects/{projectId}/env",
+        "logs": "https://api.vercel.com/v2/deployments/{deploymentId}/events",
+        "edge": "https://api.vercel.com/v1/edge-config"
+      },
+      "digitalocean": {
+        "droplets": "https://api.digitalocean.com/v2/droplets",
+        "kubernetes": "https://api.digitalocean.com/v2/kubernetes/clusters",
+        "databases": "https://api.digitalocean.com/v2/databases",
+        "spaces": "https://{region}.digitaloceanspaces.com",
+        "apps": "https://api.digitalocean.com/v2/apps",
+        "functions": "https://api.digitalocean.com/v2/functions/namespaces",
+        "loadBalancers": "https://api.digitalocean.com/v2/load_balancers",
+        "volumes": "https://api.digitalocean.com/v2/volumes",
+        "vpc": "https://api.digitalocean.com/v2/vpcs"
+      },
+      "aws": {
+        "s3": "https://s3.{region}.amazonaws.com",
+        "lambda": "https://lambda.{region}.amazonaws.com",
+        "dynamodb": "https://dynamodb.{region}.amazonaws.com",
+        "sqs": "https://sqs.{region}.amazonaws.com",
+        "sns": "https://sns.{region}.amazonaws.com",
+        "ses": "https://email.{region}.amazonaws.com"
+      }
+    },
+    "ai": {
+      "anthropic": {
+        "messages": "https://api.anthropic.com/v1/messages",
+        "complete": "https://api.anthropic.com/v1/complete",
+        "tokenCount": "https://api.anthropic.com/v1/messages/count_tokens"
+      },
+      "openai": {
+        "chat": "https://api.openai.com/v1/chat/completions",
+        "embeddings": "https://api.openai.com/v1/embeddings",
+        "images": "https://api.openai.com/v1/images/generations",
+        "audio": "https://api.openai.com/v1/audio/transcriptions"
+      },
+      "replicate": {
+        "predictions": "https://api.replicate.com/v1/predictions",
+        "models": "https://api.replicate.com/v1/models"
+      }
+    },
+    "crm": {
+      "salesforce": {
+        "auth": "https://login.salesforce.com/services/oauth2/token",
+        "api": "https://{instance}.salesforce.com/services/data/v59.0",
+        "sobjects": "https://{instance}.salesforce.com/services/data/v59.0/sobjects",
+        "query": "https://{instance}.salesforce.com/services/data/v59.0/query",
+        "composite": "https://{instance}.salesforce.com/services/data/v59.0/composite",
+        "tooling": "https://{instance}.salesforce.com/services/data/v59.0/tooling",
+        "bulk": "https://{instance}.salesforce.com/services/data/v59.0/jobs/ingest",
+        "chatter": "https://{instance}.salesforce.com/services/data/v59.0/chatter"
+      },
+      "hubspot": {
+        "contacts": "https://api.hubapi.com/crm/v3/objects/contacts",
+        "companies": "https://api.hubapi.com/crm/v3/objects/companies",
+        "deals": "https://api.hubapi.com/crm/v3/objects/deals"
+      }
+    },
+    "devtools": {
+      "github": {
+        "api": "https://api.github.com",
+        "graphql": "https://api.github.com/graphql",
+        "repos": "https://api.github.com/repos/{owner}/{repo}",
+        "issues": "https://api.github.com/repos/{owner}/{repo}/issues",
+        "pulls": "https://api.github.com/repos/{owner}/{repo}/pulls",
+        "actions": "https://api.github.com/repos/{owner}/{repo}/actions",
+        "projects": "https://api.github.com/repos/{owner}/{repo}/projects"
+      },
+      "gitlab": {
+        "api": "https://gitlab.com/api/v4",
+        "projects": "https://gitlab.com/api/v4/projects",
+        "pipelines": "https://gitlab.com/api/v4/projects/{id}/pipelines"
+      },
+      "jira": {
+        "api": "https://{domain}.atlassian.net/rest/api/3",
+        "issues": "https://{domain}.atlassian.net/rest/api/3/issue",
+        "projects": "https://{domain}.atlassian.net/rest/api/3/project"
+      },
+      "linear": {
+        "graphql": "https://api.linear.app/graphql"
+      }
+    },
+    "monitoring": {
+      "datadog": {
+        "metrics": "https://api.datadoghq.com/api/v1/series",
+        "events": "https://api.datadoghq.com/api/v1/events",
+        "logs": "https://http-intake.logs.datadoghq.com/v1/input"
+      },
+      "sentry": {
+        "api": "https://sentry.io/api/0",
+        "envelope": "https://o{org_id}.ingest.sentry.io/api/{project_id}/envelope"
+      },
+      "grafana": {
+        "api": "https://{instance}.grafana.net/api",
+        "dashboards": "https://{instance}.grafana.net/api/dashboards"
+      }
+    },
+    "communication": {
+      "slack": {
+        "postMessage": "https://slack.com/api/chat.postMessage",
+        "webhooks": "https://hooks.slack.com/services/{workspace}/{channel}/{token}"
+      },
+      "discord": {
+        "api": "https://discord.com/api/v10",
+        "webhooks": "https://discord.com/api/webhooks/{webhook_id}/{token}"
+      },
+      "twilio": {
+        "messages": "https://api.twilio.com/2010-04-01/Accounts/{accountSid}/Messages.json",
+        "calls": "https://api.twilio.com/2010-04-01/Accounts/{accountSid}/Calls.json"
+      }
+    },
+    "edge": {
+      "piCluster": {
+        "gateway": "http://pi-gateway.local:8080",
+        "nodes": "http://pi-node-{n}.local:8080",
+        "orchestrator": "http://pi-gateway.local:8081/api",
+        "prometheus": "http://pi-gateway.local:9090/api/v1",
+        "grafana": "http://pi-gateway.local:3000/api"
+      },
+      "localServices": {
+        "docker": "unix:///var/run/docker.sock",
+        "k3s": "https://localhost:6443",
+        "redis": "redis://localhost:6379",
+        "postgres": "postgresql://localhost:5432"
+      }
+    },
+    "mobile": {
+      "termius": {
+        "api": "https://api.termius.com/api/v3",
+        "hosts": "https://api.termius.com/api/v3/hosts",
+        "groups": "https://api.termius.com/api/v3/groups"
+      },
+      "workingCopy": {
+        "callback": "working-copy://x-callback-url",
+        "push": "working-copy://x-callback-url/push",
+        "pull": "working-copy://x-callback-url/pull",
+        "clone": "working-copy://x-callback-url/clone"
+      }
+    }
+  },
+  "healthChecks": {
+    "interval": "5m",
+    "timeout": "30s",
+    "retries": 3,
+    "endpoints": [
+      {"name": "Cloudflare", "url": "https://api.cloudflare.com/client/v4/user/tokens/verify"},
+      {"name": "GitHub", "url": "https://api.github.com/rate_limit"},
+      {"name": "Vercel", "url": "https://api.vercel.com/v2/user"},
+      {"name": "DigitalOcean", "url": "https://api.digitalocean.com/v2/account"},
+      {"name": "Anthropic", "url": "https://api.anthropic.com/v1/messages"},
+      {"name": "Salesforce", "url": "https://login.salesforce.com/.well-known/openid-configuration"}
+    ]
+  }
+}
