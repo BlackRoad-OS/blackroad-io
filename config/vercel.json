@@ -1,0 +1,140 @@
+{
+  "$schema": "https://blackroad.io/schemas/vercel.json",
+  "version": "2.0.0",
+  "metadata": {
+    "description": "Vercel deployment configuration for edge deployments",
+    "lastUpdated": "2026-01-27"
+  },
+  "connection": {
+    "apiEndpoint": "https://api.vercel.com",
+    "authEnvVar": "VERCEL_TOKEN",
+    "teamIdEnvVar": "VERCEL_TEAM_ID"
+  },
+  "projects": {
+    "blackroad-io": {
+      "name": "blackroad-io",
+      "framework": "static",
+      "buildCommand": null,
+      "outputDirectory": "./",
+      "installCommand": null,
+      "devCommand": null,
+      "rootDirectory": null
+    },
+    "blackroad-api": {
+      "name": "blackroad-api",
+      "framework": "nextjs",
+      "buildCommand": "npm run build",
+      "outputDirectory": ".next",
+      "installCommand": "npm install",
+      "devCommand": "npm run dev"
+    },
+    "blackroad-dashboard": {
+      "name": "blackroad-dashboard",
+      "framework": "vite",
+      "buildCommand": "npm run build",
+      "outputDirectory": "dist",
+      "installCommand": "npm install"
+    }
+  },
+  "deploymentSettings": {
+    "production": {
+      "branch": "main",
+      "autoAlias": true,
+      "protection": {
+        "bypass": false,
+        "password": false
+      }
+    },
+    "preview": {
+      "branches": ["develop", "staging", "feature/*", "claude/*"],
+      "autoAlias": true,
+      "expiration": "7d"
+    }
+  },
+  "domains": {
+    "production": [
+      "blackroad.io",
+      "www.blackroad.io"
+    ],
+    "staging": [
+      "staging.blackroad.io"
+    ],
+    "api": [
+      "api.blackroad.io"
+    ]
+  },
+  "environmentVariables": {
+    "shared": [
+      {"key": "NODE_ENV", "target": ["production", "preview"], "type": "plain"},
+      {"key": "NEXT_PUBLIC_API_URL", "target": ["production", "preview"], "type": "plain"}
+    ],
+    "secrets": [
+      {"key": "ANTHROPIC_API_KEY", "target": ["production", "preview"], "type": "encrypted"},
+      {"key": "CLOUDFLARE_API_TOKEN", "target": ["production"], "type": "encrypted"},
+      {"key": "SALESFORCE_CLIENT_SECRET", "target": ["production"], "type": "encrypted"},
+      {"key": "GITHUB_TOKEN", "target": ["production", "preview"], "type": "encrypted"}
+    ]
+  },
+  "edgeFunctions": {
+    "api-middleware": {
+      "runtime": "edge",
+      "regions": ["iad1", "sfo1", "lhr1", "hnd1"],
+      "memory": 128
+    },
+    "auth-handler": {
+      "runtime": "edge",
+      "regions": "all"
+    }
+  },
+  "cron": [
+    {
+      "path": "/api/cron/sync-state",
+      "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/cron/health-check",
+      "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/cron/cleanup",
+      "schedule": "0 0 * * *"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {"key": "X-Frame-Options", "value": "DENY"},
+        {"key": "X-Content-Type-Options", "value": "nosniff"},
+        {"key": "Referrer-Policy", "value": "strict-origin-when-cross-origin"}
+      ]
+    },
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {"key": "Cache-Control", "value": "no-store, must-revalidate"},
+        {"key": "Access-Control-Allow-Origin", "value": "https://blackroad.io"}
+      ]
+    }
+  ],
+  "redirects": [
+    {"source": "/github", "destination": "https://github.com/BlackRoad-OS", "permanent": false},
+    {"source": "/docs", "destination": "https://docs.blackroad.io", "permanent": false}
+  ],
+  "rewrites": [
+    {"source": "/api/:path*", "destination": "https://api.blackroad.io/:path*"}
+  ],
+  "integrations": {
+    "github": {
+      "enabled": true,
+      "repo": "BlackRoad-OS/blackroad-io",
+      "productionBranch": "main"
+    },
+    "analytics": {
+      "enabled": true
+    },
+    "speedInsights": {
+      "enabled": true
+    }
+  }
+}

@@ -1,0 +1,328 @@
+{
+  "$schema": "https://blackroad.io/schemas/apis.json",
+  "version": "2.0.0",
+  "metadata": {
+    "project": "blackroad-io",
+    "organization": "BlackRoad-OS",
+    "updated": "2026-01-27",
+    "hashAlgorithm": "sha256+infinity"
+  },
+  "environments": {
+    "production": {
+      "baseUrl": "https://api.blackroad.io",
+      "healthEndpoint": "/health"
+    },
+    "staging": {
+      "baseUrl": "https://staging-api.blackroad.io",
+      "healthEndpoint": "/health"
+    },
+    "development": {
+      "baseUrl": "http://localhost:3000",
+      "healthEndpoint": "/health"
+    }
+  },
+  "apis": {
+    "cloudflare": {
+      "name": "Cloudflare",
+      "type": "state-management",
+      "description": "Primary state holder - KV, R2, D1, Workers",
+      "endpoints": {
+        "api": "https://api.cloudflare.com/client/v4",
+        "kv": "https://api.cloudflare.com/client/v4/accounts/{account_id}/storage/kv/namespaces",
+        "r2": "https://api.cloudflare.com/client/v4/accounts/{account_id}/r2/buckets",
+        "d1": "https://api.cloudflare.com/client/v4/accounts/{account_id}/d1/database",
+        "workers": "https://api.cloudflare.com/client/v4/accounts/{account_id}/workers/scripts",
+        "pages": "https://api.cloudflare.com/client/v4/accounts/{account_id}/pages/projects"
+      },
+      "auth": {
+        "type": "bearer",
+        "envVar": "CLOUDFLARE_API_TOKEN",
+        "accountIdVar": "CLOUDFLARE_ACCOUNT_ID"
+      },
+      "stateManagement": {
+        "kvNamespaces": {
+          "projects": "BLACKROAD_PROJECTS_KV",
+          "sessions": "BLACKROAD_SESSIONS_KV",
+          "cache": "BLACKROAD_CACHE_KV",
+          "agents": "BLACKROAD_AGENTS_KV"
+        },
+        "d1Databases": {
+          "main": "blackroad-main-db",
+          "analytics": "blackroad-analytics-db"
+        },
+        "r2Buckets": {
+          "assets": "blackroad-assets",
+          "backups": "blackroad-backups",
+          "artifacts": "blackroad-artifacts"
+        }
+      },
+      "healthCheck": {
+        "endpoint": "/user/tokens/verify",
+        "method": "GET",
+        "expectedStatus": 200
+      }
+    },
+    "salesforce": {
+      "name": "Salesforce",
+      "type": "crm",
+      "description": "CRM and customer data management - holds detailed records",
+      "endpoints": {
+        "login": "https://login.salesforce.com/services/oauth2/token",
+        "api": "https://{instance}.salesforce.com/services/data/v59.0",
+        "sobjects": "https://{instance}.salesforce.com/services/data/v59.0/sobjects",
+        "query": "https://{instance}.salesforce.com/services/data/v59.0/query",
+        "composite": "https://{instance}.salesforce.com/services/data/v59.0/composite"
+      },
+      "auth": {
+        "type": "oauth2",
+        "clientIdVar": "SALESFORCE_CLIENT_ID",
+        "clientSecretVar": "SALESFORCE_CLIENT_SECRET",
+        "usernameVar": "SALESFORCE_USERNAME",
+        "passwordVar": "SALESFORCE_PASSWORD",
+        "securityTokenVar": "SALESFORCE_SECURITY_TOKEN"
+      },
+      "objects": {
+        "projects": "BlackRoad_Project__c",
+        "repos": "BlackRoad_Repository__c",
+        "agents": "BlackRoad_Agent__c",
+        "deployments": "BlackRoad_Deployment__c",
+        "pullRequests": "BlackRoad_PullRequest__c"
+      },
+      "healthCheck": {
+        "endpoint": "/services/data/v59.0/limits",
+        "method": "GET",
+        "expectedStatus": 200
+      }
+    },
+    "github": {
+      "name": "GitHub",
+      "type": "source-control",
+      "description": "Source code, issues, PRs, Projects, Actions",
+      "endpoints": {
+        "api": "https://api.github.com",
+        "graphql": "https://api.github.com/graphql",
+        "repos": "https://api.github.com/repos/{owner}/{repo}",
+        "projects": "https://api.github.com/projects",
+        "projectsV2": "https://api.github.com/graphql"
+      },
+      "auth": {
+        "type": "bearer",
+        "envVar": "GITHUB_TOKEN"
+      },
+      "organization": "BlackRoad-OS",
+      "projectsConfig": {
+        "mainProject": "BlackRoad Empire",
+        "fields": {
+          "status": ["Backlog", "Todo", "In Progress", "Review", "Done"],
+          "priority": ["Critical", "High", "Medium", "Low"],
+          "type": ["Feature", "Bug", "Enhancement", "Documentation", "Security"],
+          "sprint": "current-sprint",
+          "assignee": "agent-or-human",
+          "repository": "linked-repo"
+        }
+      },
+      "healthCheck": {
+        "endpoint": "/rate_limit",
+        "method": "GET",
+        "expectedStatus": 200
+      }
+    },
+    "vercel": {
+      "name": "Vercel",
+      "type": "deployment",
+      "description": "Edge deployments and serverless functions",
+      "endpoints": {
+        "api": "https://api.vercel.com",
+        "deployments": "https://api.vercel.com/v13/deployments",
+        "projects": "https://api.vercel.com/v9/projects",
+        "domains": "https://api.vercel.com/v5/domains",
+        "secrets": "https://api.vercel.com/v3/projects/{projectId}/env"
+      },
+      "auth": {
+        "type": "bearer",
+        "envVar": "VERCEL_TOKEN",
+        "teamIdVar": "VERCEL_TEAM_ID"
+      },
+      "healthCheck": {
+        "endpoint": "/v2/user",
+        "method": "GET",
+        "expectedStatus": 200
+      }
+    },
+    "digitalocean": {
+      "name": "Digital Ocean",
+      "type": "infrastructure",
+      "description": "Droplets, Kubernetes, Databases, Spaces",
+      "endpoints": {
+        "api": "https://api.digitalocean.com/v2",
+        "droplets": "https://api.digitalocean.com/v2/droplets",
+        "kubernetes": "https://api.digitalocean.com/v2/kubernetes/clusters",
+        "databases": "https://api.digitalocean.com/v2/databases",
+        "spaces": "https://{region}.digitaloceanspaces.com",
+        "apps": "https://api.digitalocean.com/v2/apps"
+      },
+      "auth": {
+        "type": "bearer",
+        "envVar": "DIGITALOCEAN_TOKEN",
+        "spacesKeyVar": "DIGITALOCEAN_SPACES_KEY",
+        "spacesSecretVar": "DIGITALOCEAN_SPACES_SECRET"
+      },
+      "healthCheck": {
+        "endpoint": "/account",
+        "method": "GET",
+        "expectedStatus": 200
+      }
+    },
+    "claude": {
+      "name": "Claude (Anthropic)",
+      "type": "ai-agent",
+      "description": "AI agents for code generation and analysis",
+      "endpoints": {
+        "api": "https://api.anthropic.com/v1",
+        "messages": "https://api.anthropic.com/v1/messages",
+        "completions": "https://api.anthropic.com/v1/complete"
+      },
+      "auth": {
+        "type": "x-api-key",
+        "envVar": "ANTHROPIC_API_KEY"
+      },
+      "models": {
+        "opus": "claude-opus-4-5-20251101",
+        "sonnet": "claude-sonnet-4-20250514",
+        "haiku": "claude-haiku-3-5-20241022"
+      },
+      "agentConfig": {
+        "maxTokens": 8192,
+        "temperature": 0.7,
+        "systemPrompt": "You are a BlackRoad OS agent. Follow project conventions strictly."
+      },
+      "healthCheck": {
+        "endpoint": "/v1/messages",
+        "method": "POST",
+        "testPayload": {
+          "model": "claude-haiku-3-5-20241022",
+          "max_tokens": 10,
+          "messages": [{"role": "user", "content": "ping"}]
+        },
+        "expectedStatus": 200
+      }
+    },
+    "piCluster": {
+      "name": "Raspberry Pi Cluster",
+      "type": "edge-compute",
+      "description": "Local Pi cluster for edge computing and IoT",
+      "endpoints": {
+        "gateway": "http://pi-gateway.local:8080",
+        "nodes": [
+          "http://pi-node-1.local:8080",
+          "http://pi-node-2.local:8080",
+          "http://pi-node-3.local:8080",
+          "http://pi-node-4.local:8080"
+        ],
+        "orchestrator": "http://pi-gateway.local:8081/api",
+        "metrics": "http://pi-gateway.local:9090/api/v1"
+      },
+      "auth": {
+        "type": "api-key",
+        "envVar": "PI_CLUSTER_API_KEY"
+      },
+      "services": {
+        "docker": true,
+        "k3s": true,
+        "prometheus": true,
+        "grafana": true
+      },
+      "healthCheck": {
+        "endpoint": "/health",
+        "method": "GET",
+        "expectedStatus": 200
+      }
+    },
+    "termius": {
+      "name": "Termius",
+      "type": "ssh-management",
+      "description": "SSH client and host management",
+      "endpoints": {
+        "api": "https://api.termius.com/api/v3",
+        "hosts": "https://api.termius.com/api/v3/hosts",
+        "groups": "https://api.termius.com/api/v3/groups",
+        "keys": "https://api.termius.com/api/v3/keys"
+      },
+      "auth": {
+        "type": "bearer",
+        "envVar": "TERMIUS_API_TOKEN"
+      },
+      "syncConfig": {
+        "autoSync": true,
+        "encryptionEnabled": true
+      },
+      "healthCheck": {
+        "endpoint": "/api/v3/hosts",
+        "method": "GET",
+        "expectedStatus": 200
+      }
+    },
+    "mobileTools": {
+      "ish": {
+        "name": "iSH Shell",
+        "type": "mobile-terminal",
+        "description": "Linux shell for iOS",
+        "configPath": "~/.blackroad/ish-config.json",
+        "features": ["alpine-linux", "apk-packages", "x86-emulation"]
+      },
+      "shellfish": {
+        "name": "Shellfish SFTP",
+        "type": "mobile-sftp",
+        "description": "SFTP client for iOS",
+        "configPath": "~/.blackroad/shellfish-config.json",
+        "features": ["sftp", "terminal", "files-app-integration"]
+      },
+      "workingCopy": {
+        "name": "Working Copy",
+        "type": "mobile-git",
+        "description": "Git client for iOS",
+        "urlScheme": "working-copy://",
+        "features": ["clone", "push", "pull", "diff", "merge"],
+        "callbacks": {
+          "onPush": "working-copy://x-callback-url/push",
+          "onPull": "working-copy://x-callback-url/pull",
+          "onCommit": "working-copy://x-callback-url/commit"
+        }
+      },
+      "pyto": {
+        "name": "Pyto",
+        "type": "mobile-python",
+        "description": "Python IDE for iOS",
+        "urlScheme": "pyto://",
+        "features": ["python3", "numpy", "pandas", "automation"],
+        "scriptsPath": "~/Documents/Pyto/blackroad"
+      }
+    }
+  },
+  "integrationMatrix": {
+    "description": "How services interact - Salesforce-like project management via GitHub",
+    "stateFlow": {
+      "primary": "cloudflare",
+      "crm": "salesforce",
+      "source": "github",
+      "comment": "Cloudflare KV/D1 holds runtime state, Salesforce holds CRM/detailed records, GitHub holds code"
+    },
+    "syncPatterns": {
+      "projectSync": {
+        "source": "github.projects",
+        "targets": ["salesforce.objects.projects", "cloudflare.kv.projects"],
+        "frequency": "realtime-webhook"
+      },
+      "deploymentSync": {
+        "sources": ["vercel", "cloudflare.pages"],
+        "targets": ["salesforce.objects.deployments", "github.deployments"],
+        "frequency": "on-deploy"
+      },
+      "agentSync": {
+        "source": "claude",
+        "targets": ["cloudflare.kv.agents", "salesforce.objects.agents"],
+        "frequency": "on-session"
+      }
+    }
+  }
+}
