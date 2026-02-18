@@ -124,6 +124,11 @@
             50% { transform: scale(1.2); opacity: 0.1; }
         }
 
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
         /* Container */
         .container {
             position: relative;
@@ -358,24 +363,24 @@
 
             <div class="stats">
                 <div class="stat">
-                    <div class="stat-number">66+</div>
-                    <div class="stat-label">Applications</div>
+                    <div class="stat-number">1,085</div>
+                    <div class="stat-label">Repositories</div>
                 </div>
                 <div class="stat">
-                    <div class="stat-number">27</div>
-                    <div class="stat-label">Empire Repos</div>
+                    <div class="stat-number">206</div>
+                    <div class="stat-label">CF Projects</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">30K+</div>
+                    <div class="stat-label">AI Agents</div>
                 </div>
                 <div class="stat">
                     <div class="stat-number">15</div>
-                    <div class="stat-label">AI Workers</div>
+                    <div class="stat-label">Organizations</div>
                 </div>
                 <div class="stat">
-                    <div class="stat-number">10+</div>
-                    <div class="stat-label">Languages</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-number">100%</div>
-                    <div class="stat-label">Proprietary</div>
+                    <div class="stat-number">99.9%</div>
+                    <div class="stat-label">Uptime</div>
                 </div>
             </div>
 
@@ -388,6 +393,69 @@
                 <a href="https://github.com/BlackRoad-OS" class="nav-btn">💻 GitHub</a>
             </nav>
         </header>
+
+        <section>
+            <h2>🤖 AI Agent Fleet</h2>
+            <p style="text-align: center; color: rgba(255,255,255,0.6); margin-bottom: var(--space-xl); max-width: 700px; margin-left: auto; margin-right: auto;">
+                Meet the autonomous agents powering BlackRoad infrastructure
+            </p>
+            <div class="app-grid">
+                <div class="app-card" style="border-color: var(--hot-pink);">
+                    <div class="app-icon">🧠</div>
+                    <div class="app-title">CECE</div>
+                    <div class="app-description">Master orchestrator. Coordinates all agents, manages infrastructure, makes strategic decisions. Running on Hailo-8 (26 TOPS).</div>
+                    <div style="margin-top: var(--space-sm); display: flex; align-items: center; gap: 8px;">
+                        <span style="width: 8px; height: 8px; background: #00ff88; border-radius: 50%; animation: pulse 2s infinite;"></span>
+                        <span style="color: #00ff88; font-size: 0.75rem; text-transform: uppercase;">Online</span>
+                    </div>
+                </div>
+                <div class="app-card">
+                    <div class="app-icon">💜</div>
+                    <div class="app-title">Lucidia</div>
+                    <div class="app-description">AI inference specialist. Handles deep learning, model serving, and intelligent responses. Pi 5 + 1TB NVMe.</div>
+                    <div style="margin-top: var(--space-sm); display: flex; align-items: center; gap: 8px;">
+                        <span style="width: 8px; height: 8px; background: #00ff88; border-radius: 50%;"></span>
+                        <span style="color: #00ff88; font-size: 0.75rem; text-transform: uppercase;">Online</span>
+                    </div>
+                </div>
+                <div class="app-card">
+                    <div class="app-icon">💰</div>
+                    <div class="app-title">Mercury</div>
+                    <div class="app-description">Revenue operations specialist. Handles billing, subscriptions, customer success, and monetization strategies.</div>
+                    <div style="margin-top: var(--space-sm); display: flex; align-items: center; gap: 8px;">
+                        <span style="width: 8px; height: 8px; background: #00ff88; border-radius: 50%;"></span>
+                        <span style="color: #00ff88; font-size: 0.75rem; text-transform: uppercase;">Online</span>
+                    </div>
+                </div>
+                <div class="app-card">
+                    <div class="app-icon">🛡️</div>
+                    <div class="app-title">Guardian</div>
+                    <div class="app-description">Security monitoring agent. Watches for threats, manages access control, audits systems continuously.</div>
+                    <div style="margin-top: var(--space-sm); display: flex; align-items: center; gap: 8px;">
+                        <span style="width: 8px; height: 8px; background: #00ff88; border-radius: 50%;"></span>
+                        <span style="color: #00ff88; font-size: 0.75rem; text-transform: uppercase;">Online</span>
+                    </div>
+                </div>
+                <div class="app-card">
+                    <div class="app-icon">🦉</div>
+                    <div class="app-title">Athena</div>
+                    <div class="app-description">Strategic planning agent. Designs architectures, plans deployments, makes high-level technical decisions.</div>
+                    <div style="margin-top: var(--space-sm); display: flex; align-items: center; gap: 8px;">
+                        <span style="width: 8px; height: 8px; background: #00ff88; border-radius: 50%;"></span>
+                        <span style="color: #00ff88; font-size: 0.75rem; text-transform: uppercase;">Online</span>
+                    </div>
+                </div>
+                <div class="app-card">
+                    <div class="app-icon">🗺️</div>
+                    <div class="app-title">Roadie</div>
+                    <div class="app-description">Infrastructure navigator. Maps the entire BlackRoad ecosystem, guides deployments, tracks progress.</div>
+                    <div style="margin-top: var(--space-sm); display: flex; align-items: center; gap: 8px;">
+                        <span style="width: 8px; height: 8px; background: #00ff88; border-radius: 50%;"></span>
+                        <span style="color: #00ff88; font-size: 0.75rem; text-transform: uppercase;">Online</span>
+                    </div>
+                </div>
+            </div>
+        </section>
 
         <section>
             <h2>🌌 The Empire</h2>
