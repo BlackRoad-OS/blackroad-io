@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlackRoad API</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --black: #000; --white: #fff; --amber: #F5A623;
+            --hot-pink: #FF1D6C; --violet: #9C27B0; --electric-blue: #2979FF;
+            --gradient-brand: linear-gradient(135deg, var(--amber) 0%, var(--hot-pink) 38.2%, var(--violet) 61.8%, var(--electric-blue) 100%);
+        }
+        body { 
+            font-family: 'SF Pro Display', -apple-system, sans-serif;
+            background: var(--black); color: var(--white); line-height: 1.618;
+        }
+        nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            background: rgba(0,0,0,0.9); backdrop-filter: blur(20px);
+            padding: 21px 55px; border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .logo { font-size: 20px; font-weight: 700; }
+        .logo span { background: var(--gradient-brand); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .main { padding: 144px 55px 89px; max-width: 900px; margin: 0 auto; }
+        h1 { font-size: 48px; font-weight: 700; margin-bottom: 13px; }
+        h1 span { background: var(--gradient-brand); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .subtitle { font-size: 18px; color: rgba(255,255,255,0.6); margin-bottom: 55px; }
+        .code-block {
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 13px; padding: 21px; font-family: 'SF Mono', monospace;
+            font-size: 14px; overflow-x: auto; margin-bottom: 34px;
+        }
+        .code-block .comment { color: rgba(255,255,255,0.4); }
+        .code-block .string { color: var(--amber); }
+        .code-block .keyword { color: var(--hot-pink); }
+        .endpoint {
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 13px; padding: 21px; margin-bottom: 21px;
+        }
+        .endpoint-header { display: flex; align-items: center; gap: 13px; margin-bottom: 13px; }
+        .method { padding: 5px 13px; border-radius: 5px; font-size: 12px; font-weight: 600; }
+        .method.get { background: rgba(16,185,129,0.2); color: #10b981; }
+        .method.post { background: rgba(41,121,255,0.2); color: #2979FF; }
+        .endpoint-path { font-family: monospace; font-size: 14px; }
+        .endpoint-desc { color: rgba(255,255,255,0.6); font-size: 14px; }
+        footer { text-align: center; padding: 55px; color: rgba(255,255,255,0.4); font-size: 12px; margin-top: 89px; }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="logo">BLACKROAD <span>API</span></div>
+    </nav>
+    <div class="main">
+        <h1>API <span>Reference</span></h1>
+        <p class="subtitle">Build with BlackRoad infrastructure</p>
+        
+        <h2 style="margin-bottom: 21px; font-size: 24px;">Quick Start</h2>
+        <div class="code-block">
+<span class="comment"># Install the SDK</span>
+npm install @blackroad/sdk
+
+<span class="comment"># Or use curl</span>
+curl -X POST https://api.blackroad.io/v1/chat \
+  -H <span class="string">"Authorization: Bearer YOUR_API_KEY"</span> \
+  -H <span class="string">"Content-Type: application/json"</span> \
+  -d <span class="string">'{"model": "cece", "prompt": "Hello"}'</span>
+        </div>
+        
+        <h2 style="margin-bottom: 21px; font-size: 24px;">Endpoints</h2>
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="method post">POST</span>
+                <span class="endpoint-path">/v1/chat</span>
+            </div>
+            <div class="endpoint-desc">Send a message to CECE AI</div>
+        </div>
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="method get">GET</span>
+                <span class="endpoint-path">/v1/models</span>
+            </div>
+            <div class="endpoint-desc">List available AI models</div>
+        </div>
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="method post">POST</span>
+                <span class="endpoint-path">/v1/agents</span>
+            </div>
+            <div class="endpoint-desc">Create a new AI agent</div>
+        </div>
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="method get">GET</span>
+                <span class="endpoint-path">/v1/status</span>
+            </div>
+            <div class="endpoint-desc">Get system status</div>
+        </div>
+    </div>
+    <footer>
+        <p>© 2026 BlackRoad OS, Inc.</p>
+    </footer>
+</body>
+</html>
