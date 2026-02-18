@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlackRoad Features</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, sans-serif; background: #000; color: #fff; }
+        .hero { padding: 120px 20px 60px; text-align: center; }
+        h1 { font-size: 48px; margin-bottom: 20px; }
+        .subtitle { color: rgba(255,255,255,0.6); font-size: 18px; margin-bottom: 60px; }
+        .features { max-width: 1200px; margin: 0 auto; padding: 0 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .feature { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 30px; }
+        .feature-icon { font-size: 40px; margin-bottom: 20px; }
+        .feature-title { font-size: 20px; font-weight: 600; margin-bottom: 10px; }
+        .feature-desc { color: rgba(255,255,255,0.6); font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <h1>Features</h1>
+        <p class="subtitle">Everything you need to build with AI agents</p>
+    </div>
+    <div class="features">
+        <div class="feature"><div class="feature-icon">🤖</div><div class="feature-title">1000+ AI Agents</div><div class="feature-desc">Deploy and manage thousands of autonomous AI agents</div></div>
+        <div class="feature"><div class="feature-icon">🧠</div><div class="feature-title">Multi-Model Support</div><div class="feature-desc">Claude, GPT-4, Llama, Mistral, and custom models</div></div>
+        <div class="feature"><div class="feature-icon">☁️</div><div class="feature-title">Edge Deployment</div><div class="feature-desc">Run on Cloudflare Workers with global distribution</div></div>
+        <div class="feature"><div class="feature-icon">🔒</div><div class="feature-title">Self-Hosted Option</div><div class="feature-desc">Full sovereignty with CECE on your infrastructure</div></div>
+        <div class="feature"><div class="feature-icon">📊</div><div class="feature-title">Real-time Analytics</div><div class="feature-desc">Monitor performance, costs, and agent behavior</div></div>
+        <div class="feature"><div class="feature-icon">🔗</div><div class="feature-title">50+ Integrations</div><div class="feature-desc">Connect to any API, database, or service</div></div>
+    </div>
+</body>
+</html>
