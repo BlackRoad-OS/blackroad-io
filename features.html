@@ -6,29 +6,92 @@
     <title>BlackRoad Features</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, sans-serif; background: #000; color: #fff; }
-        .hero { padding: 120px 20px 60px; text-align: center; }
-        h1 { font-size: 48px; margin-bottom: 20px; }
-        .subtitle { color: rgba(255,255,255,0.6); font-size: 18px; margin-bottom: 60px; }
-        .features { max-width: 1200px; margin: 0 auto; padding: 0 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-        .feature { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 30px; }
-        .feature-icon { font-size: 40px; margin-bottom: 20px; }
-        .feature-title { font-size: 20px; font-weight: 600; margin-bottom: 10px; }
+        :root {
+            --black: #000; --white: #fff; --amber: #F5A623;
+            --hot-pink: #FF1D6C; --violet: #9C27B0; --electric-blue: #2979FF;
+            --gradient-brand: linear-gradient(135deg, var(--amber) 0%, var(--hot-pink) 38.2%, var(--violet) 61.8%, var(--electric-blue) 100%);
+        }
+        body { 
+            font-family: 'SF Pro Display', -apple-system, sans-serif;
+            background: var(--black); color: var(--white); line-height: 1.618;
+        }
+        nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            background: rgba(0,0,0,0.9); backdrop-filter: blur(20px);
+            padding: 21px 55px; border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .logo { font-size: 20px; font-weight: 700; }
+        .logo span { background: var(--gradient-brand); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .main { padding: 144px 55px 89px; max-width: 1200px; margin: 0 auto; }
+        h1 { font-size: 48px; font-weight: 700; margin-bottom: 13px; text-align: center; }
+        h1 span { background: var(--gradient-brand); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .subtitle { font-size: 18px; color: rgba(255,255,255,0.6); margin-bottom: 55px; text-align: center; }
+        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 21px; }
+        .feature {
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 13px; padding: 34px; transition: all 0.3s;
+        }
+        .feature:hover { border-color: var(--hot-pink); transform: translateY(-5px); }
+        .feature-icon { font-size: 34px; margin-bottom: 21px; }
+        .feature-title { font-size: 20px; font-weight: 600; margin-bottom: 13px; }
         .feature-desc { color: rgba(255,255,255,0.6); font-size: 14px; }
+        footer { text-align: center; padding: 55px; color: rgba(255,255,255,0.4); font-size: 12px; margin-top: 89px; }
     </style>
 </head>
 <body>
-    <div class="hero">
-        <h1>Features</h1>
-        <p class="subtitle">Everything you need to build with AI agents</p>
+    <nav>
+        <div class="logo">BLACKROAD <span>OS</span></div>
+    </nav>
+    <div class="main">
+        <h1>Platform <span>Features</span></h1>
+        <p class="subtitle">Everything you need to build sovereign AI infrastructure</p>
+        
+        <div class="features-grid">
+            <div class="feature">
+                <div class="feature-icon">🧠</div>
+                <div class="feature-title">CECE Sovereign AI</div>
+                <div class="feature-desc">16 AI models running locally on your infrastructure. Full control, no external dependencies.</div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🤖</div>
+                <div class="feature-title">Agent Framework</div>
+                <div class="feature-desc">Deploy and manage thousands of AI agents with our distributed orchestration system.</div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🔐</div>
+                <div class="feature-title">Zero Trust Security</div>
+                <div class="feature-desc">End-to-end encryption, self-hosted infrastructure, complete data sovereignty.</div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">⚡</div>
+                <div class="feature-title">Edge Computing</div>
+                <div class="feature-desc">Hailo-8 neural processors delivering 26 TOPS at the edge. 15-30x more efficient than GPUs.</div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🌐</div>
+                <div class="feature-title">Global CDN</div>
+                <div class="feature-desc">205 Cloudflare deployments across 300+ data centers worldwide.</div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">📊</div>
+                <div class="feature-title">Real-time Analytics</div>
+                <div class="feature-desc">Monitor your entire infrastructure from a single dashboard with live metrics.</div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🔄</div>
+                <div class="feature-title">CI/CD Automation</div>
+                <div class="feature-desc">GitHub Actions workflows across 1,085 repositories with automatic deployments.</div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">💰</div>
+                <div class="feature-title">0% App Store</div>
+                <div class="feature-desc">Publish and monetize apps without platform fees. Keep 100% of your revenue.</div>
+            </div>
+        </div>
     </div>
-    <div class="features">
-        <div class="feature"><div class="feature-icon">🤖</div><div class="feature-title">1000+ AI Agents</div><div class="feature-desc">Deploy and manage thousands of autonomous AI agents</div></div>
-        <div class="feature"><div class="feature-icon">🧠</div><div class="feature-title">Multi-Model Support</div><div class="feature-desc">Claude, GPT-4, Llama, Mistral, and custom models</div></div>
-        <div class="feature"><div class="feature-icon">☁️</div><div class="feature-title">Edge Deployment</div><div class="feature-desc">Run on Cloudflare Workers with global distribution</div></div>
-        <div class="feature"><div class="feature-icon">🔒</div><div class="feature-title">Self-Hosted Option</div><div class="feature-desc">Full sovereignty with CECE on your infrastructure</div></div>
-        <div class="feature"><div class="feature-icon">📊</div><div class="feature-title">Real-time Analytics</div><div class="feature-desc">Monitor performance, costs, and agent behavior</div></div>
-        <div class="feature"><div class="feature-icon">🔗</div><div class="feature-title">50+ Integrations</div><div class="feature-desc">Connect to any API, database, or service</div></div>
-    </div>
+    <footer>
+        <p>© 2026 BlackRoad OS, Inc.</p>
+    </footer>
 </body>
 </html>
