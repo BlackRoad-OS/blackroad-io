@@ -1,0 +1,256 @@
+{
+  "$schema": "https://blackroad.io/schemas/mobile-tools.json",
+  "version": "2.0.0",
+  "metadata": {
+    "description": "Mobile and terminal tool configurations for iOS/iPadOS development",
+    "lastUpdated": "2026-01-27"
+  },
+  "tools": {
+    "termius": {
+      "name": "Termius",
+      "platform": ["iOS", "iPadOS", "macOS", "Windows", "Linux", "Android"],
+      "type": "ssh-management",
+      "description": "SSH client with host management and SFTP",
+      "api": {
+        "endpoint": "https://api.termius.com/api/v3",
+        "authEnvVar": "TERMIUS_API_TOKEN"
+      },
+      "hostGroups": {
+        "production": {
+          "name": "Production Servers",
+          "hosts": [
+            {"label": "API Gateway", "hostname": "api.blackroad.io", "port": 22},
+            {"label": "Worker Pool", "hostname": "workers.blackroad.io", "port": 22}
+          ]
+        },
+        "piCluster": {
+          "name": "Pi Cluster",
+          "hosts": [
+            {"label": "Pi Gateway", "hostname": "pi-gateway.local", "port": 22},
+            {"label": "Pi Node 1", "hostname": "pi-node-1.local", "port": 22},
+            {"label": "Pi Node 2", "hostname": "pi-node-2.local", "port": 22},
+            {"label": "Pi Node 3", "hostname": "pi-node-3.local", "port": 22},
+            {"label": "Pi Node 4", "hostname": "pi-node-4.local", "port": 22}
+          ]
+        },
+        "development": {
+          "name": "Development",
+          "hosts": [
+            {"label": "Local Dev", "hostname": "localhost", "port": 22},
+            {"label": "Staging", "hostname": "staging.blackroad.io", "port": 22}
+          ]
+        }
+      },
+      "snippets": [
+        {"name": "Check Services", "command": "systemctl status blackroad-*"},
+        {"name": "View Logs", "command": "journalctl -u blackroad-api -f"},
+        {"name": "Deploy Status", "command": "kubectl get pods -n blackroad"},
+        {"name": "Git Status All Repos", "command": "for d in ~/repos/*/; do echo \"=== $d ===\"; git -C \"$d\" status -s; done"}
+      ]
+    },
+    "iSH": {
+      "name": "iSH Shell",
+      "platform": ["iOS", "iPadOS"],
+      "type": "linux-shell",
+      "description": "Alpine Linux shell for iOS with x86 emulation",
+      "features": ["alpine-linux", "apk-packages", "x86-emulation", "files-app-integration"],
+      "setupCommands": [
+        "apk update",
+        "apk add git python3 py3-pip nodejs npm curl jq openssh",
+        "pip3 install requests anthropic",
+        "npm install -g @anthropic-ai/sdk gh"
+      ],
+      "configuration": {
+        "mountPoints": {
+          "iCloudDrive": "/mnt/icloud",
+          "localFiles": "/mnt/files"
+        },
+        "environment": {
+          "BLACKROAD_HOME": "~/.blackroad",
+          "PATH": "$PATH:~/.blackroad/bin"
+        }
+      },
+      "scripts": {
+        "sync-repos": "#!/bin/sh\ncd ~/repos\nfor repo in */; do\n  echo \"Syncing $repo\"\n  git -C \"$repo\" pull --rebase\ndone",
+        "check-apis": "#!/bin/sh\ncurl -s https://api.blackroad.io/health | jq .",
+        "run-hash": "#!/bin/sh\npython3 ~/.blackroad/utils/hash.py sha256 \"$1\""
+      }
+    },
+    "shellfish": {
+      "name": "Shellfish SFTP",
+      "platform": ["iOS", "iPadOS"],
+      "type": "sftp-client",
+      "description": "SFTP client with Files app integration and terminal",
+      "features": ["sftp", "terminal", "files-app-provider", "shortcuts-support"],
+      "configuration": {
+        "servers": [
+          {
+            "name": "BlackRoad Production",
+            "host": "files.blackroad.io",
+            "port": 22,
+            "username": "deploy",
+            "authMethod": "key"
+          },
+          {
+            "name": "Pi Cluster Storage",
+            "host": "pi-gateway.local",
+            "port": 22,
+            "username": "pi",
+            "authMethod": "key"
+          }
+        ],
+        "shortcuts": {
+          "uploadBuild": {
+            "description": "Upload build artifacts",
+            "localPath": "/builds/",
+            "remotePath": "/var/www/artifacts/"
+          },
+          "downloadLogs": {
+            "description": "Download recent logs",
+            "remotePath": "/var/log/blackroad/",
+            "localPath": "/logs/"
+          }
+        }
+      }
+    },
+    "workingCopy": {
+      "name": "Working Copy",
+      "platform": ["iOS", "iPadOS"],
+      "type": "git-client",
+      "description": "Full-featured Git client for iOS",
+      "features": ["clone", "push", "pull", "branch", "merge", "diff", "stash", "files-app-provider"],
+      "urlSchemes": {
+        "base": "working-copy://",
+        "clone": "working-copy://clone?remote={repoUrl}",
+        "open": "working-copy://open?repo={repoName}",
+        "push": "working-copy://x-callback-url/push/?repo={repoName}",
+        "pull": "working-copy://x-callback-url/pull/?repo={repoName}",
+        "commit": "working-copy://x-callback-url/commit/?repo={repoName}&message={message}",
+        "checkout": "working-copy://x-callback-url/checkout/?repo={repoName}&branch={branch}"
+      },
+      "repositories": [
+        {
+          "name": "blackroad-io",
+          "remote": "git@github.com:BlackRoad-OS/blackroad-io.git",
+          "defaultBranch": "main"
+        },
+        {
+          "name": "blackroad-api",
+          "remote": "git@github.com:BlackRoad-OS/blackroad-api.git",
+          "defaultBranch": "main"
+        }
+      ],
+      "workflows": {
+        "createFeatureBranch": [
+          "pull main",
+          "checkout -b feature/{name}",
+          "open in editor"
+        ],
+        "submitPR": [
+          "commit with message",
+          "push to origin",
+          "open GitHub PR page"
+        ]
+      }
+    },
+    "pyto": {
+      "name": "Pyto",
+      "platform": ["iOS", "iPadOS"],
+      "type": "python-ide",
+      "description": "Python 3 IDE for iOS with automation support",
+      "features": ["python3", "numpy", "pandas", "matplotlib", "shortcuts-integration", "background-scripts"],
+      "urlSchemes": {
+        "base": "pyto://",
+        "run": "pyto://run?script={scriptPath}",
+        "runCode": "pyto://run?code={base64Code}"
+      },
+      "scripts": {
+        "api_health_check": {
+          "path": "~/Documents/Pyto/blackroad/api_health.py",
+          "description": "Check all API endpoints health status",
+          "schedule": "hourly"
+        },
+        "pr_validator": {
+          "path": "~/Documents/Pyto/blackroad/pr_validator.py",
+          "description": "Validate PR before submission"
+        },
+        "hash_utility": {
+          "path": "~/Documents/Pyto/blackroad/hash_util.py",
+          "description": "SHA-256 and SHA-Infinity hashing"
+        },
+        "sync_salesforce": {
+          "path": "~/Documents/Pyto/blackroad/sf_sync.py",
+          "description": "Sync local state to Salesforce"
+        }
+      },
+      "packages": [
+        "requests",
+        "anthropic",
+        "simple-salesforce",
+        "pygithub"
+      ]
+    },
+    "aCode": {
+      "name": "a]Code",
+      "platform": ["iOS", "iPadOS"],
+      "type": "code-editor",
+      "description": "Code editor with syntax highlighting and Git integration",
+      "features": ["syntax-highlighting", "git-integration", "sftp", "ftp", "webdav"]
+    },
+    "codeedit": {
+      "name": "CodeEdit",
+      "platform": ["macOS"],
+      "type": "ide",
+      "description": "Native macOS code editor",
+      "features": ["swift-native", "git-integration", "extensions"]
+    }
+  },
+  "shortcuts": {
+    "description": "iOS Shortcuts automation configurations",
+    "automations": [
+      {
+        "name": "Morning Sync",
+        "trigger": "Time: 8:00 AM",
+        "actions": [
+          "Pull all repos in Working Copy",
+          "Check API health via Pyto",
+          "Send summary notification"
+        ]
+      },
+      {
+        "name": "Quick Commit",
+        "trigger": "Manual or Widget",
+        "input": "Commit message",
+        "actions": [
+          "Commit current changes in Working Copy",
+          "Push to origin",
+          "Notify on completion"
+        ]
+      },
+      {
+        "name": "Deploy Check",
+        "trigger": "Manual",
+        "actions": [
+          "SSH to production via Termius",
+          "Run deployment status check",
+          "Display results"
+        ]
+      }
+    ]
+  },
+  "syncConfiguration": {
+    "iCloudSync": {
+      "enabled": true,
+      "paths": [
+        "~/.blackroad/config/",
+        "~/.blackroad/scripts/",
+        "~/Documents/Pyto/blackroad/"
+      ]
+    },
+    "gitSync": {
+      "autoFetch": true,
+      "fetchInterval": "15m",
+      "notifyOnChanges": true
+    }
+  }
+}

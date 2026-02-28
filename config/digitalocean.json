@@ -1,0 +1,221 @@
+{
+  "$schema": "https://blackroad.io/schemas/digitalocean.json",
+  "version": "2.0.0",
+  "metadata": {
+    "description": "Digital Ocean infrastructure configuration",
+    "lastUpdated": "2026-01-27"
+  },
+  "connection": {
+    "apiEndpoint": "https://api.digitalocean.com/v2",
+    "authEnvVar": "DIGITALOCEAN_TOKEN",
+    "spacesKeyEnvVar": "DIGITALOCEAN_SPACES_KEY",
+    "spacesSecretEnvVar": "DIGITALOCEAN_SPACES_SECRET"
+  },
+  "regions": {
+    "primary": "nyc3",
+    "secondary": "sfo3",
+    "eu": "ams3",
+    "asia": "sgp1"
+  },
+  "droplets": {
+    "api-server": {
+      "name": "blackroad-api-{region}",
+      "size": "s-2vcpu-4gb",
+      "image": "ubuntu-22-04-x64",
+      "region": ["nyc3", "sfo3"],
+      "vpc": "blackroad-vpc",
+      "tags": ["production", "api", "load-balanced"],
+      "userData": "#!/bin/bash\napt-get update\napt-get install -y docker.io docker-compose\nsystemctl enable docker"
+    },
+    "worker-node": {
+      "name": "blackroad-worker-{n}",
+      "size": "s-4vcpu-8gb",
+      "image": "ubuntu-22-04-x64",
+      "region": "nyc3",
+      "vpc": "blackroad-vpc",
+      "tags": ["production", "worker"],
+      "count": 3
+    },
+    "dev-server": {
+      "name": "blackroad-dev",
+      "size": "s-2vcpu-2gb",
+      "image": "ubuntu-22-04-x64",
+      "region": "nyc3",
+      "vpc": "blackroad-vpc",
+      "tags": ["development"]
+    }
+  },
+  "kubernetes": {
+    "cluster": {
+      "name": "blackroad-k8s",
+      "region": "nyc3",
+      "version": "1.29",
+      "vpc": "blackroad-vpc",
+      "ha": true,
+      "nodePools": [
+        {
+          "name": "default-pool",
+          "size": "s-4vcpu-8gb",
+          "count": 3,
+          "autoScale": {
+            "enabled": true,
+            "minNodes": 2,
+            "maxNodes": 10
+          },
+          "labels": {"workload": "general"}
+        },
+        {
+          "name": "worker-pool",
+          "size": "s-8vcpu-16gb",
+          "count": 2,
+          "autoScale": {
+            "enabled": true,
+            "minNodes": 1,
+            "maxNodes": 5
+          },
+          "labels": {"workload": "compute"},
+          "taints": [{"key": "workload", "value": "compute", "effect": "NoSchedule"}]
+        }
+      ]
+    },
+    "namespaces": [
+      "blackroad-production",
+      "blackroad-staging",
+      "blackroad-agents",
+      "monitoring"
+    ]
+  },
+  "databases": {
+    "postgres": {
+      "name": "blackroad-postgres",
+      "engine": "pg",
+      "version": "16",
+      "size": "db-s-2vcpu-4gb",
+      "region": "nyc3",
+      "numNodes": 2,
+      "databases": ["blackroad_production", "blackroad_staging"],
+      "users": ["blackroad_app", "blackroad_readonly"]
+    },
+    "redis": {
+      "name": "blackroad-redis",
+      "engine": "redis",
+      "version": "7",
+      "size": "db-s-1vcpu-1gb",
+      "region": "nyc3",
+      "numNodes": 1
+    }
+  },
+  "spaces": {
+    "assets": {
+      "name": "blackroad-assets",
+      "region": "nyc3",
+      "acl": "public-read",
+      "cdn": {
+        "enabled": true,
+        "customDomain": "assets.blackroad.io"
+      },
+      "cors": {
+        "origins": ["https://blackroad.io", "https://*.blackroad.io"],
+        "methods": ["GET", "HEAD"],
+        "maxAge": 86400
+      }
+    },
+    "backups": {
+      "name": "blackroad-backups",
+      "region": "nyc3",
+      "acl": "private",
+      "lifecycle": {
+        "deleteAfterDays": 90
+      }
+    },
+    "artifacts": {
+      "name": "blackroad-artifacts",
+      "region": "nyc3",
+      "acl": "private"
+    }
+  },
+  "apps": {
+    "blackroad-api": {
+      "name": "blackroad-api-app",
+      "region": "nyc",
+      "services": [
+        {
+          "name": "api",
+          "github": {
+            "repo": "BlackRoad-OS/blackroad-api",
+            "branch": "main",
+            "deployOnPush": true
+          },
+          "instanceSizeSlug": "professional-xs",
+          "instanceCount": 2,
+          "httpPort": 3000,
+          "routes": [{"path": "/"}]
+        }
+      ],
+      "databases": [
+        {"name": "blackroad-postgres", "engine": "PG"}
+      ],
+      "envs": [
+        {"key": "NODE_ENV", "value": "production"},
+        {"key": "DATABASE_URL", "scope": "RUN_TIME", "type": "SECRET"}
+      ]
+    }
+  },
+  "loadBalancers": {
+    "api-lb": {
+      "name": "blackroad-api-lb",
+      "region": "nyc3",
+      "algorithm": "round_robin",
+      "healthCheck": {
+        "protocol": "http",
+        "port": 80,
+        "path": "/health",
+        "interval": 10,
+        "timeout": 5,
+        "unhealthyThreshold": 3,
+        "healthyThreshold": 5
+      },
+      "forwardingRules": [
+        {"entryProtocol": "https", "entryPort": 443, "targetProtocol": "http", "targetPort": 80, "certificateId": "auto"},
+        {"entryProtocol": "http", "entryPort": 80, "targetProtocol": "http", "targetPort": 80}
+      ],
+      "dropletTag": "api"
+    }
+  },
+  "firewalls": {
+    "api-firewall": {
+      "name": "blackroad-api-firewall",
+      "dropletTags": ["api"],
+      "inboundRules": [
+        {"protocol": "tcp", "ports": "22", "sources": {"addresses": ["0.0.0.0/0"]}},
+        {"protocol": "tcp", "ports": "80", "sources": {"loadBalancers": ["api-lb"]}},
+        {"protocol": "tcp", "ports": "443", "sources": {"loadBalancers": ["api-lb"]}}
+      ],
+      "outboundRules": [
+        {"protocol": "tcp", "ports": "all", "destinations": {"addresses": ["0.0.0.0/0"]}}
+      ]
+    }
+  },
+  "monitoring": {
+    "alerts": [
+      {
+        "name": "High CPU Usage",
+        "type": "v1/insights/droplet/cpu",
+        "compare": "GreaterThan",
+        "value": 80,
+        "window": "5m",
+        "tags": ["production"],
+        "notify": ["email:ops@blackroad.io", "slack:alerts"]
+      },
+      {
+        "name": "Droplet Down",
+        "type": "v1/insights/droplet/status",
+        "compare": "Equals",
+        "value": "offline",
+        "window": "1m",
+        "tags": ["production"],
+        "notify": ["email:ops@blackroad.io", "slack:critical"]
+      }
+    ]
+  }
+}
